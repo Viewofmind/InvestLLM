@@ -1,0 +1,133 @@
+version: '3.8'
+
+# InvestLLM Infrastructure
+# Start with: docker-compose up -d
+
+services:
+  # ===========================================
+  # PostgreSQL with TimescaleDB
+  # ===========================================
+  postgres:
+    image: timescale/timescaledb:latest-pg15
+    container_name: investllm-postgres
+    environment:
+      POSTGRES_DB: investllm
+      POSTGRES_USER: investllm
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-investllm_secure_password}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U investllm"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # Redis (Caching & Queues)
+  # ===========================================
+  redis:
+    image: redis:7-alpine
+    container_name: investllm-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ===========================================
+  # Qdrant (Vector Database)
+  # ===========================================
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: investllm-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    restart: unless-stopped
+    environment:
+      QDRANT__SERVICE__GRPC_PORT: 6334
+
+  # ===========================================
+  # MLflow (Experiment Tracking)
+  # ===========================================
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.10.0
+    container_name: investllm-mlflow
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlflow
+    environment:
+      MLFLOW_BACKEND_STORE_URI: postgresql://investllm:${POSTGRES_PASSWORD:-investllm_secure_password}@postgres:5432/investllm
+      MLFLOW_DEFAULT_ARTIFACT_ROOT: /mlflow/artifacts
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    command: >
+      mlflow server
+      --backend-store-uri postgresql://investllm:${POSTGRES_PASSWORD:-investllm_secure_password}@postgres:5432/investllm
+      --default-artifact-root /mlflow/artifacts
+      --host 0.0.0.0
+      --port 5000
+
+  # ===========================================
+  # Airflow (Data Pipelines) - Optional
+  # ===========================================
+  # Uncomment when ready for production pipelines
+  # 
+  # airflow-webserver:
+  #   image: apache/airflow:2.8.1
+  #   container_name: investllm-airflow
+  #   environment:
+  #     AIRFLOW__CORE__EXECUTOR: LocalExecutor
+  #     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql://investllm:${POSTGRES_PASSWORD}@postgres:5432/investllm
+  #     AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW_FERNET_KEY}
+  #   ports:
+  #     - "8080:8080"
+  #   volumes:
+  #     - ./dags:/opt/airflow/dags
+  #     - airflow_logs:/opt/airflow/logs
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #   command: webserver
+
+  # ===========================================
+  # Jupyter Lab (Development)
+  # ===========================================
+  jupyter:
+    image: jupyter/scipy-notebook:latest
+    container_name: investllm-jupyter
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/home/jovyan/notebooks
+      - ./data:/home/jovyan/data
+      - ./investllm:/home/jovyan/investllm
+    environment:
+      JUPYTER_ENABLE_LAB: "yes"
+      JUPYTER_TOKEN: ${JUPYTER_TOKEN:-investllm}
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  qdrant_data:
+  mlflow_data:
+  airflow_logs:
+
+networks:
+  default:
+    name: investllm-network
