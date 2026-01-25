@@ -38,8 +38,8 @@ fastparquet==2024.2.0
 
 # Time Series
 ta==0.11.0
-ta-lib==0.4.28
-pandas-ta==0.3.14b
+# ta-lib==0.4.28  # Requires system library, install manually
+# pandas-ta==0.3.14b  # Version not found, use pip install pandas-ta instead
 
 # ML/DL Core
 torch==2.2.0
@@ -53,10 +53,10 @@ bitsandbytes==0.42.0
 safetensors==0.4.2
 
 # Fine-tuning & FinGPT
-unsloth==2024.2
+# unsloth==2024.2  # Complex deps, install separately
 trl==0.7.10
-peft==0.8.2
-bitsandbytes==0.42.0
+# peft==0.8.2  # Already listed above
+# bitsandbytes==0.42.0  # Already listed above
 huggingface_hub==0.20.3
 
 # Experiment Tracking
@@ -86,13 +86,13 @@ fastapi==0.109.0
 uvicorn[standard]==0.27.0
 
 # Scheduling
-apache-airflow==2.8.1
+# apache-airflow==2.8.1  # Heavy dependency, install separately if needed
 celery==5.3.6
-redis==5.0.1
+# redis==5.0.1  # Already listed above
 
 # Testing
 pytest==8.0.0
-pytest-asyncio==0.23.4
+pytest-asyncio==0.24.0
 pytest-cov==4.1.0
 
 # Development
