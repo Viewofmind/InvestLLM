@@ -133,11 +133,11 @@ class HuggingFaceDataCollector:
             console.print(f"[green]✓ Downloaded successfully[/green]")
             
             # Show info
+            console.print(f"  Type: {type(dataset)}")
             if hasattr(dataset, 'num_rows'):
-                console.print(f"  Rows: {dataset.num_rows:,}")
+                console.print(f"  Rows: {dataset.num_rows}")
             elif isinstance(dataset, dict):
-                for key, ds in dataset.items():
-                    console.print(f"  {key}: {ds.num_rows:,} rows")
+                console.print(f"  Keys: {list(dataset.keys())}")
             
             return dataset
             
