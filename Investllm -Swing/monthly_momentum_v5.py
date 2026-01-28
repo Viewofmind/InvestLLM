@@ -225,6 +225,15 @@ class MonthlyMomentumBacktesterV5:
         self.use_trailing_stop = use_trailing_stop
         self.use_volatility_filter = use_volatility_filter
 
+        # Transaction costs (realistic for Indian markets)
+        self.brokerage_rate = 0.0003   # 0.03% each way (discount broker)
+        self.stt_rate = 0.001          # 0.10% STT on sell only
+        self.slippage_rate = 0.001     # 0.10% slippage each way
+
+        # Cost multipliers
+        self.buy_cost_multiplier = 1 + self.brokerage_rate + self.slippage_rate  # 1.0013
+        self.sell_cost_multiplier = 1 - self.brokerage_rate - self.stt_rate - self.slippage_rate  # 0.9977
+
         self.strategy = MonthlyMomentumStrategyV5(
             portfolio_size=portfolio_size,
             monthly_turnover=monthly_turnover,
@@ -281,6 +290,12 @@ class MonthlyMomentumBacktesterV5:
         print(f"  - Volatility Filter: {self.use_volatility_filter}")
         print(f"  - Max Position Loss: {self.strategy.risk_manager.max_position_loss*100:.0f}%")
 
+        print(f"\nTransaction Costs:")
+        print(f"  - Brokerage: {self.brokerage_rate*100:.2f}% each way")
+        print(f"  - STT: {self.stt_rate*100:.2f}% on sell")
+        print(f"  - Slippage: {self.slippage_rate*100:.2f}% each way")
+        print(f"  - Total round-trip: ~{(self.brokerage_rate*2 + self.stt_rate + self.slippage_rate*2)*100:.2f}%")
+
         capital = self.initial_capital
         portfolio = {}  # symbol -> {shares, entry_price, entry_date, high_since_entry}
 
@@ -335,7 +350,8 @@ class MonthlyMomentumBacktesterV5:
                     )
 
                     if should_exit:
-                        proceeds = position['shares'] * current_price
+                        # Apply transaction costs on sell
+                        proceeds = position['shares'] * current_price * self.sell_cost_multiplier
                         capital += proceeds
 
                         profit_pct = (current_price - position['entry_price']) / position['entry_price']
@@ -419,7 +435,8 @@ class MonthlyMomentumBacktesterV5:
 
                         if not symbol_row.empty:
                             exit_price = symbol_row['close'].values[0]
-                            proceeds = position['shares'] * exit_price
+                            # Apply transaction costs on sell
+                            proceeds = position['shares'] * exit_price * self.sell_cost_multiplier
                             capital += proceeds
 
                             profit_pct = (exit_price - position['entry_price']) / position['entry_price']
@@ -456,8 +473,10 @@ class MonthlyMomentumBacktesterV5:
                         entry_price = symbol_row['close'].values[0]
                         shares = int(position_size / entry_price)
 
-                        if shares > 0 and capital >= shares * entry_price:
-                            invested = shares * entry_price
+                        # Apply transaction costs on buy
+                        total_cost = shares * entry_price * self.buy_cost_multiplier
+                        if shares > 0 and capital >= total_cost:
+                            invested = total_cost
                             capital -= invested
 
                             portfolio[symbol] = {
