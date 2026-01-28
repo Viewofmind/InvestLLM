@@ -1,500 +1,227 @@
-# InvestLLM - Swing Trading Adaptation 📊
+# InvestLLM - Swing Trading Strategy V5 📊
 
-> **Transform InvestLLM from position trading to swing trading in 3 hours**
+> **Monthly Momentum Strategy with Risk Controls**
 >
-> Achieve **60%+ annual returns** with **1.5+ Sharpe ratio** through high-frequency swing trades
+> **23.76% CAGR | 11.76% Alpha over NIFTY | Sharpe 1.22**
 
 ---
 
-## 🎯 What's This?
+## 🎯 Strategy Overview
 
-This package adapts your existing InvestLLM position trading system for **swing trading** (1-week holding periods).
+This is a **production-ready momentum strategy** that beats NIFTY 50 by 11.76% annually over 18.8 years of backtesting.
 
-### Key Differences
+### Key Results (2007-2025)
 
-| Aspect | Position Trading | Swing Trading |
-|--------|------------------|---------------|
-| **Holding Period** | 2-8 weeks | 3-7 days |
-| **Profit Target** | 50% | 15-25% |
-| **Stop Loss** | 15% | 6-10% |
-| **Trades/Year** | ~4 per stock | ~50 per stock |
-| **Sharpe Ratio** | 1.38 | **1.48** ⬆️ |
-| **Win Rate** | 62.8% | **64.1%** ⬆️ |
-| **Max Drawdown** | 12% | **8.9%** ⬇️ |
+| Metric | V5 (With Risk) | V4 (No Risk) | NIFTY 50 |
+|--------|---------------|--------------|----------|
+| **CAGR** | **23.76%** | 20.19% | ~12% |
+| **Max Drawdown** | **-47.30%** | -63.82% | ~55% |
+| **Sharpe Ratio** | **1.22** | 0.88 | ~0.5 |
+| **Profit Factor** | **3.03** | 0.96 | - |
+| **Alpha** | **+11.76%** | +8.19% | 0% |
+| **Final Equity** | **₹55.2L** | ₹31.8L | ~₹10L |
 
-### Why Swing Trading?
-
-✅ **More Opportunities**: 10x more trades per year  
-✅ **Better Risk-Adjusted Returns**: Higher Sharpe ratio  
-✅ **Lower Drawdown**: Shorter holding = less exposure  
-✅ **Faster Capital Turnover**: Deploy capital more efficiently  
-✅ **Lower Overnight Risk**: Exit positions faster  
+Starting with ₹1,00,000 in 2007 → ₹55,21,722 in 2025
 
 ---
 
-## 📦 What's Included
+## 📦 Strategy Components
 
-This package contains **5 main files**:
+### Core Strategy (monthly_momentum_v5.py)
 
-### 1. `swing_feature_engineering.py` 🔧
-Creates 85 swing-specific features:
-- Short-term momentum (3-7 days)
-- Gap analysis (overnight moves)
-- Weekly seasonality (Monday effect, Friday strength)
-- Volatility regime detection
-- Intraday patterns
+1. **Stock Selection**: Top 20 stocks by 12-month momentum
+2. **Rebalancing**: Monthly turnover of 5 stocks
+3. **Position Sizing**: Equal weight with volatility adjustment
 
-**Usage:**
-```bash
-python swing_feature_engineering.py --stocks all --output data/swing_features/
-```
+### Risk Controls
 
----
-
-### 2. `train_swing_model.py` 🧠
-Fine-tunes existing LSTM model for swing trading:
-- Adapts sequence length (60 → 30 days)
-- Freezes early layers for faster training
-- Trains on 5-day prediction horizon
-- Saves optimized model
-
-**Usage:**
-```bash
-# Quick test on 3 stocks
-python train_swing_model.py --stocks "RELIANCE,TCS,HDFCBANK" --quick-test
-
-# Full training on GPU
-python train_swing_model.py --stocks all --device cuda
-```
-
-**Training Time:**
-- Quick test (3 stocks): 5 minutes
-- Full training (98 stocks): 2-3 hours on RTX 4090
-
----
-
-### 3. `swing_exit_strategy.py` 🎯
-Dynamic exit strategy optimized for swing trading:
-- **Confidence-based targets**: 15-25% based on model confidence
-- **Volatility-adjusted stops**: 6-10% based on stock volatility
-- **Trailing stops**: Activate after 10% profit
-- **Time-based exits**: Force exit after 5-7 days
-- **Breakeven protection**: Move stop to breakeven after 5% profit
-
-**Usage:**
-```bash
-# Test strategy
-python swing_exit_strategy.py
-
-# Optimize parameters
-python swing_exit_strategy.py --data trades.csv --optimize
-```
-
-**Features:**
-```python
-# Automatic adjustment based on:
-confidence = 0.75  # Model confidence
-volatility = 0.30  # Stock volatility (30% annual)
-
-# Results in:
-profit_target = 20%  # Medium confidence target
-stop_loss = 8%       # Normal volatility stop
-```
-
----
-
-### 4. `swing_backtester.py` 📈
-Comprehensive backtesting engine:
-- Realistic entry/exit simulation
-- Transaction costs (0.03%)
-- Slippage modeling (0.1%)
-- Risk management
-- Performance metrics
-
-**Usage:**
-```bash
-python swing_backtester.py \
-  --model models/swing_trained/best_model.pt \
-  --stocks all \
-  --start-date 2022-01-01 \
-  --capital 100000 \
-  --output reports/swing_backtest/
-```
-
-**Output:**
-- `all_trades.csv`: Every trade with entry/exit/P&L
-- `equity_curve.csv`: Daily equity progression
-- `summary.csv`: Performance metrics
-
----
-
-### 5. `configs/swing_training.yaml` ⚙️
-Configuration file for training:
-```yaml
-model:
-  sequence_length: 30  # Shorter for swing
-  hidden_dim: 256
-  num_layers: 3
-
-training:
-  freeze_layers: ["lstm.0", "lstm.1"]  # Fine-tuning
-  learning_rate: 1e-5
-  epochs: 25
-
-data:
-  target_horizon: 5  # 5-day prediction
-  target_threshold: 0.15  # 15% target
-```
+| Control | Setting | Purpose |
+|---------|---------|---------|
+| Trailing Stop | 15% | Lock in profits from peak |
+| Max Position Loss | 20% | Limit per-trade losses |
+| Volatility Filter | On | Reduce exposure in high-vol |
+| Daily Monitoring | On | Check stops every trading day |
 
 ---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- InvestLLM already installed
-- 20 years of price data collected
-- Existing LSTM model trained
+- Python 3.8+
+- pandas, numpy
+- Price data in parquet format
 
-### Installation (5 minutes)
-
-```bash
-# 1. Navigate to InvestLLM directory
-cd InvestLLM/
-
-# 2. Create swing directory
-mkdir -p investllm_swing configs
-
-# 3. Copy provided files
-cp /path/to/swing_files/* investllm_swing/
-cp /path/to/configs/* configs/
-
-# 4. Verify installation
-ls investllm_swing/
-# Should show:
-# - swing_feature_engineering.py
-# - train_swing_model.py
-# - swing_exit_strategy.py
-# - swing_backtester.py
-# - QUICK_START.md
-# - SWING_TRADING_ROADMAP.md
-```
-
-### Run Complete Pipeline (3 hours)
+### Run Backtest
 
 ```bash
-# Step 1: Generate features (15 min)
-python investllm_swing/swing_feature_engineering.py --stocks all
+# With risk controls (recommended)
+python monthly_momentum_v5.py --features swing_features/ --capital 100000
 
-# Step 2: Quick test (5 min)
-python investllm_swing/train_swing_model.py \
-  --stocks "RELIANCE,TCS,HDFCBANK" --quick-test
-
-# Step 3: Full training (2-3 hours on GPU)
-python investllm_swing/train_swing_model.py --stocks all --device cuda
-
-# Step 4: Backtest (5 min)
-python investllm_swing/swing_backtester.py \
-  --model models/swing_trained/best_model.pt \
-  --stocks all --capital 100000
+# Without risk controls (comparison)
+python monthly_momentum_v5.py --features swing_features/ --no-trailing-stop --no-vol-filter
 ```
 
-**See `QUICK_START.md` for detailed instructions!**
-
----
-
-## 📊 Expected Results
-
-### Training Metrics
+### Output
 ```
-Epoch 25/25 Complete:
-├─ Train Loss: 0.0156
-├─ Val Loss: 0.0178
-├─ Directional Accuracy: 56.3%
-├─ Training time: 2.5 hours
-└─ Model saved ✓
-```
-
-### Backtest Results (2022-2024)
-```
-Total Trades: 245
-Win Rate: 64.1%
-Average Return: 18.3%
-Total Return: 95.2%
-Sharpe Ratio: 1.48
-Max Drawdown: 8.9%
-Avg Hold Days: 4.8
-```
-
-### Performance vs Position Trading
-```
-                Position    Swing      Winner
-Win Rate        62.8%      64.1%      Swing ✅
-Sharpe          1.38       1.48       Swing ✅
-Max DD          12%        8.9%       Swing ✅
-Annual Return   40%        ~60%       Swing ✅
+CAGR: 23.76%
+Max Drawdown: -47.30%
+Sharpe Ratio: 1.22
+Final Equity: ₹5,521,722
 ```
 
 ---
 
-## 🗂️ File Structure
+## 📁 File Structure
 
 ```
-InvestLLM/
-├── investllm_swing/              # Swing trading package
-│   ├── swing_feature_engineering.py
-│   ├── train_swing_model.py
-│   ├── swing_exit_strategy.py
-│   ├── swing_backtester.py
-│   ├── QUICK_START.md
-│   ├── SWING_TRADING_ROADMAP.md
-│   └── README.md (this file)
-│
-├── configs/
-│   └── swing_training.yaml       # Training configuration
-│
-├── data/
-│   └── swing_features/           # Generated features
-│       ├── RELIANCE_swing_features.parquet
-│       ├── TCS_swing_features.parquet
-│       └── all_swing_features.parquet
-│
-├── models/
-│   ├── swing_trained/            # Trained swing model
-│   │   └── best_model.pt
-│   └── ensemble_trained/         # Original position model (base)
-│
-└── reports/
-    └── swing_backtest/           # Backtest results
-        ├── all_trades.csv
-        ├── equity_curve.csv
-        └── summary.csv
+Investllm -Swing/
+├── monthly_momentum_v5.py      # V5 Strategy with risk controls
+├── monthly_momentum_v4.py      # Base momentum strategy
+├── momentum_backtester_v4.py   # 20-day breakout strategy
+├── ensemble_predictor.py       # ML temperature scaling
+├── swing_backtester_v3.py      # GPU-accelerated backtester
+├── swing_exit_strategy_v3.py   # Dynamic exit logic
+├── gpu_package_v3/             # GPU training scripts
+│   ├── train_ensemble.py
+│   ├── run_gpu_v3.sh
+│   └── README_V3.txt
+└── reports/                    # Backtest results
 ```
 
 ---
 
-## 📚 Documentation
+## 📊 Strategy Comparison
 
-### Quick References
+### All Strategies Tested
 
-1. **QUICK_START.md** - Get running in 1 hour
-2. **SWING_TRADING_ROADMAP.md** - Complete 4-week deployment plan
-3. **This README** - Overview and usage
+| Strategy | CAGR | Max DD | Sharpe | Alpha |
+|----------|------|--------|--------|-------|
+| **V5 Monthly Momentum** | **23.76%** | -47% | 1.22 | +11.76% |
+| V4 Monthly Momentum | 20.19% | -64% | 0.88 | +8.19% |
+| V4 20-Day Breakout | 5.67% | -42% | 0.38 | -6.33% |
+| V3 ML (LSTM Ensemble) | 5.42% | -15% | 0.41 | -6.58% |
 
-### Key Concepts
-
-#### Feature Engineering
-- **Short-term focus**: 3-7 day patterns vs 20-200 day for position
-- **Gap analysis**: Opening gaps are critical for swing trading
-- **Seasonality**: Monday effect, Friday strength matter more
-- **Volatility regime**: Recent vs historical volatility
-
-#### Model Training
-- **Fine-tuning approach**: Reuse position trading model
-- **Frozen layers**: Early LSTM layers remain unchanged
-- **Shorter sequences**: 30 days vs 60 for position trading
-- **5-day horizon**: Predict 5-day forward returns
-
-#### Exit Strategy
-- **Dynamic targets**: Adjust based on confidence
-- **Volatility stops**: Wider stops for volatile stocks
-- **Time limits**: Force exit after 5-7 days
-- **Trailing protection**: Lock in profits above 10%
-
----
-
-## 🎓 Learning Path
-
-### For Beginners
-1. Start with QUICK_START.md
-2. Run on 3 stocks first
-3. Understand each component
-4. Scale to full dataset
-
-### For Advanced Users
-1. Optimize exit parameters
-2. Add custom features
-3. Experiment with ensemble methods
-4. Integrate real-time data
+### Key Insight
+> Simple momentum rules (12-month returns) beat complex ML models for stock selection.
+> Risk controls (trailing stops) IMPROVE returns by protecting capital for compounding.
 
 ---
 
 ## 🔧 Customization
 
-### Adjust Profit Targets
-
-Edit `swing_exit_strategy.py`:
-```python
-@dataclass
-class TradeConfig:
-    profit_high_confidence: float = 0.25  # 25% for high confidence
-    profit_medium_confidence: float = 0.20  # 20% for medium
-    profit_low_confidence: float = 0.15  # 15% for low
-```
-
-### Modify Stop Losses
-
-```python
-@dataclass
-class TradeConfig:
-    stop_loss_volatile: float = 0.10  # 10% for volatile stocks
-    stop_loss_normal: float = 0.08   # 8% for normal
-    stop_loss_stable: float = 0.06   # 6% for stable
-```
-
-### Change Holding Period
-
-```python
-@dataclass
-class TradeConfig:
-    max_hold_days: int = 7  # Maximum 7 days
-    force_exit_day: int = 5  # Force exit if no profit by day 5
-```
-
----
-
-## ⚠️ Important Notes
-
-### Retraining is Required
-You **cannot** use your existing position trading model directly:
-- Different sequence length (30 vs 60 days)
-- Different features (85 vs 30)
-- Different prediction horizon (5 vs 21 days)
-
-### Fine-Tuning vs Training From Scratch
-This package uses **fine-tuning**:
-- ✅ Faster training (2-3 hours vs 15-20 hours)
-- ✅ Better performance (leverages learned patterns)
-- ✅ Less data required
-- ✅ More stable convergence
-
-### Transaction Costs Matter
-Swing trading has 10x more trades:
-- Position: ~4 trades/year → 0.12% annual cost
-- Swing: ~50 trades/year → **1.5% annual cost**
-- Built into backtest: 0.03% per trade + 0.1% slippage
-
----
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**1. "Feature file not found"**
+### Adjust Trailing Stop
 ```bash
-# Solution: Generate features first
-python investllm_swing/swing_feature_engineering.py --stocks all
+python monthly_momentum_v5.py --trailing-stop 0.20  # 20% trailing stop
 ```
 
-**2. "Model dimension mismatch"**
+### Change Portfolio Size
 ```bash
-# Cause: Using wrong model or features
-# Solution: Ensure model trained on same features used for inference
+python monthly_momentum_v5.py --portfolio-size 30 --turnover 8
 ```
 
-**3. "Low accuracy in backtest"**
+### Disable Risk Controls
 ```bash
-# Solution: Optimize exit parameters
-python investllm_swing/swing_exit_strategy.py --optimize
-```
-
-**4. "Training too slow"**
-```bash
-# Solution: Use GPU (RunPod RTX 4090)
-# Cost: ~₹10-15 for full training
+python monthly_momentum_v5.py --no-trailing-stop --no-vol-filter
 ```
 
 ---
 
-## 📈 Performance Optimization
+## 📈 Historical Performance
 
-### Improve Win Rate
-1. Increase confidence threshold (0.65 → 0.70)
-2. Add fundamental filters
-3. Avoid low liquidity stocks
-4. Trade only in trending markets
+### Yearly Equity Progression
+```
+2007: ₹100,000 (start)
+2008: ₹173,868 (survived financial crisis)
+2010: ₹241,827
+2015: ₹893,220
+2020: ₹1,508,892 (survived COVID crash)
+2022: ₹3,537,287
+2025: ₹5,521,722 (55x return)
+```
 
-### Improve Returns
-1. Optimize profit targets per stock
-2. Implement better trailing stops
-3. Scale position size with confidence
-4. Add position pyramiding
-
-### Reduce Risk
-1. Diversify across sectors
-2. Reduce correlation between positions
-3. Use volatility-adjusted sizing
-4. Implement circuit breakers
+### Drawdown Analysis
+- **2008 Crisis**: V5 dropped to ₹127k (27%) vs V4's ₹104k (45%)
+- **2020 COVID**: V5 recovered faster due to trailing stops
+- **Risk controls saved ~₹20L** in avoided losses over 18 years
 
 ---
 
-## 🤝 Next Steps
+## 🧪 ML Strategy (V3) - Why It Failed
 
-### Week 1-2: Paper Trading
-- Setup paper trading system
-- Monitor 20-30 trades
-- Validate results vs backtest
+We also tested an LSTM ensemble model with:
+- 3 models trained with different seeds
+- Temperature scaling for confidence calibration
+- 54% directional accuracy
 
-### Week 3-4: Refinement
-- Optimize parameters based on paper trading
-- Fine-tune confidence thresholds
-- Adjust position sizing
+**Result**: 5.42% CAGR (below NIFTY's 12%)
 
-### Month 2: Go Live
-- Start with ₹50K
-- Max 3 open positions
-- Monitor daily
-
-### Month 3+: Scale
-- Increase to ₹2L after consistent profits
-- Scale to ₹5L+ after 3 months
-- Consider adding more strategies
+**Why**:
+- Short-term price movements are mostly noise
+- Transaction costs eat into small edges
+- Momentum anomaly (months) > ML prediction (days)
 
 ---
 
-## 📞 Support
+## 📋 Exit Reason Analysis
 
-- **Documentation**: See QUICK_START.md and SWING_TRADING_ROADMAP.md
-- **Issues**: Check error logs first
-- **Optimization**: Use parameter optimization tools
-- **Questions**: Review code comments
+| Exit Reason | Count | Avg Return |
+|-------------|-------|------------|
+| TRAILING_STOP_15% | 661 | Varies |
+| MONTHLY_REBALANCE | 105 | Varies |
+| MAX_LOSS_20% | 49 | -20% |
 
----
-
-## 🎉 Success Checklist
-
-Before going live:
-
-- [ ] Features generated (85 features × 98 stocks)
-- [ ] Model trained (val loss <0.02)
-- [ ] Directional accuracy >53%
-- [ ] Backtest Sharpe >1.3
-- [ ] Win rate >60%
-- [ ] Max drawdown <12%
-- [ ] Paper trading validated
-- [ ] Risk management tested
-- [ ] Broker API integrated
-- [ ] Monitoring system ready
+Trailing stops accounted for 81% of all exits - actively managing risk.
 
 ---
 
-## 📄 License
+## 🎯 Production Deployment
 
-Part of InvestLLM - Proprietary License
+### Paper Trading Checklist
+- [ ] Run backtest on latest data
+- [ ] Verify signal generation
+- [ ] Test order execution logic
+- [ ] Monitor for 1 month
 
----
-
-## 🙏 Credits
-
-Built upon the InvestLLM position trading system with adaptations for swing trading.
-
----
-
-**Ready to swing trade?** 🚀
-
-Start with `QUICK_START.md` and you'll be paper trading in 3 hours!
+### Live Trading Setup
+1. Connect to broker API (Zerodha/Angel)
+2. Schedule monthly rebalancing (last trading day)
+3. Daily trailing stop monitoring (3:25 PM check)
+4. Position sizing based on available capital
 
 ---
 
-*InvestLLM Swing Trading Adaptation*  
-*Version 1.0 - January 2026*  
-*Optimized for 3-7 day holding periods*
+## ⚠️ Risk Warnings
+
+1. **Past performance doesn't guarantee future results**
+2. **-47% max drawdown is significant** - size positions accordingly
+3. **Requires 20+ stocks for diversification**
+4. **Monthly rebalancing = lower turnover but delayed reaction**
+
+---
+
+## 📚 References
+
+- Jegadeesh & Titman (1993) - "Returns to Buying Winners"
+- Moskowitz & Grinblatt (1999) - "Industry Momentum"
+- Asness et al. (2013) - "Value and Momentum Everywhere"
+
+---
+
+## 🏆 Summary
+
+| Metric | Value |
+|--------|-------|
+| Strategy | Monthly Momentum + Risk Controls |
+| CAGR | 23.76% |
+| Alpha vs NIFTY | +11.76% |
+| Max Drawdown | -47.30% |
+| Sharpe Ratio | 1.22 |
+| Profit Factor | 3.03 |
+| Backtest Period | 18.8 years (2007-2025) |
+| Total Return | 5,421% |
+
+---
+
+*InvestLLM Swing Trading V5*
+*Version 5.0 - January 2026*
+*Monthly Momentum with Trailing Stops*
