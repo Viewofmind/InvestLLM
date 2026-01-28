@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  investllm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      # Trading Mode
+      - TRADING_MODE=paper
+      - INITIAL_CAPITAL=1000000
+
+      # API Keys (set these in production)
+      - ZERODHA_API_KEY=${ZERODHA_API_KEY:-}
+      - ZERODHA_API_SECRET=${ZERODHA_API_SECRET:-}
+      - FIRECRAWL_API_KEY=${FIRECRAWL_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+
+      # Risk Limits
+      - MAX_POSITION_PCT=0.05
+      - MAX_SECTOR_PCT=0.20
+      - MAX_DRAWDOWN_PCT=0.15
+      - DAILY_LOSS_LIMIT_PCT=0.03
+    volumes:
+      - investllm_data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  investllm_data:
+
+# Development override
+# Use: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
