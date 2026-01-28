@@ -2,39 +2,69 @@
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-Proprietary-red.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/status-Phase%201-yellow.svg)](#roadmap)
+[![Status](https://img.shields.io/badge/status-Phase%204%20Complete-green.svg)](#roadmap)
+[![Sharpe](https://img.shields.io/badge/Sharpe%20Ratio-1.38-blue.svg)](#results)
+[![Return](https://img.shields.io/badge/Avg%20Return-73.31%25-brightgreen.svg)](#results)
 
-> **A Proprietary AI System for Indian Stock Market Analysis**
+> **A Proprietary AI Ensemble System for Indian Stock Market Analysis**
 
-Building a self-improving AI that can:
-- 📈 **Predict** stock price movements
-- 🧠 **Generate** and adapt trading strategies
-- 📰 **Analyze** sentiment from news and events
-- 🔄 **Learn** from outcomes and improve continuously
+An AI-powered trading system achieving **73.31% average returns** with **1.38 Sharpe ratio** on NIFTY 100 stocks:
+- 📈 **LSTM Price Model** - Bidirectional with attention mechanism (4M params)
+- 🧠 **FinBERT Sentiment** - 99% accuracy on financial text
+- 📊 **Fundamental Scorer** - Rule-based quality assessment
+- 🎯 **Smart Exit Strategy** - Dynamic profit targets & stop losses
 
 ---
 
-## 🎯 Project Vision
+## 🏆 Backtest Results (98 NIFTY Stocks)
+
+| Metric | Result | Target |
+|--------|--------|--------|
+| **Average Return** | 73.31% | >50% |
+| **Sharpe Ratio** | 1.38 | >1.5 |
+| **Win Rate** | 62.8% | >50% |
+| **Profitable Stocks** | 87% (85/98) | >70% |
+| **Sentiment Accuracy** | 99% | >85% |
+
+### Top Performers
+| Stock | Return | Trades | Win Rate |
+|-------|--------|--------|----------|
+| BEL | 249.7% | 4 | 100% |
+| PFC | 218.4% | 4 | 100% |
+| TVSMOTOR | 217.7% | 4 | 100% |
+| M&M | 192.9% | 4 | 75% |
+| ADANIPORTS | 180.7% | 4 | 75% |
+
+---
+
+## 🎯 System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                         INVESTLLM ARCHITECTURE                              │
+│                      INVESTLLM ENSEMBLE ARCHITECTURE                        │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │                                                                             │
-│                              ┌─────────────┐                                │
-│                              │ ORCHESTRATOR│                                │
-│                              │    LLM      │                                │
-│                              │ (Mixtral)   │                                │
-│                              └──────┬──────┘                                │
-│                                     │                                       │
-│            ┌────────────────────────┼────────────────────────┐              │
-│            │                        │                        │              │
-│            ▼                        ▼                        ▼              │
-│   ┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐      │
-│   │   SENTIMENT     │     │     PRICE       │     │    STRATEGY     │      │
-│   │    MODEL        │     │   PREDICTION    │     │     ENGINE      │      │
-│   │ (Mistral 7B)    │     │    (TFT)        │     │   (RL Agent)    │      │
-│   └─────────────────┘     └─────────────────┘     └─────────────────┘      │
+│   ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐            │
+│   │   SENTIMENT     │  │     PRICE       │  │   FUNDAMENTAL   │            │
+│   │    MODEL        │  │   PREDICTION    │  │     SCORER      │            │
+│   │  (FinBERT)      │  │  (LSTM+Attn)    │  │  (Rule-based)   │            │
+│   │   99% Acc       │  │   4M Params     │  │  Quality Score  │            │
+│   └────────┬────────┘  └────────┬────────┘  └────────┬────────┘            │
+│            │                    │                    │                      │
+│            └────────────────────┼────────────────────┘                      │
+│                                 ▼                                           │
+│                     ┌─────────────────────┐                                 │
+│                     │    META-LEARNER     │                                 │
+│                     │  Signal Aggregator  │                                 │
+│                     └──────────┬──────────┘                                 │
+│                                │                                            │
+│                                ▼                                            │
+│                     ┌─────────────────────┐                                 │
+│                     │   SMART EXIT        │                                 │
+│                     │  • 50% Profit Target│                                 │
+│                     │  • 15% Stop Loss    │                                 │
+│                     │  • MA-based Exit    │                                 │
+│                     └─────────────────────┘                                 │
 │                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -46,10 +76,10 @@ Building a self-improving AI that can:
 | Phase | Status | Progress |
 |-------|--------|----------|
 | Phase 1: Data Foundation | 🟢 Complete | ██████████ 100% |
-| Phase 2: Sentiment Model | 🔄 In Progress | ░░░░░░░░░░ 0% (Phase 6) |
-| Phase 3: Price Prediction | 🟢 Complete | ██████████ 100% |
-| Phase 4: Strategy Engine | 🟢 Complete | ██████████ 100% (+91% Return) |
-| Phase 5: Orchestrator | ⚪ Not Started | ░░░░░░░░░░ 0% |
+| Phase 2: Sentiment Model | 🟢 Complete | ██████████ 100% (FinBERT 99% Acc) |
+| Phase 3: Price Prediction | 🟢 Complete | ██████████ 100% (LSTM Ensemble) |
+| Phase 4: Strategy Engine | 🟢 Complete | ██████████ 100% (+73% Return) |
+| Phase 5: Orchestrator | 🔄 Next | ░░░░░░░░░░ 0% |
 
 ---
 
@@ -114,31 +144,35 @@ InvestLLM/
 ├── investllm/
 │   ├── data/                    # Data collection & processing
 │   │   ├── collectors/          # Data source collectors
-│   │   │   ├── price_collector.py
-│   │   │   ├── news_collector.py
-│   │   │   └── fundamental_collector.py
-│   │   ├── processors/          # Data cleaning (TODO)
 │   │   └── models.py            # Database models
 │   │
-│   ├── models/                  # ML Models (TODO)
-│   │   ├── sentiment/           # Sentiment models
-│   │   ├── prediction/          # Price prediction
-│   │   ├── strategy/            # RL strategy
-│   │   └── orchestrator/        # Main LLM
+│   ├── models/                  # ML Models
+│   │   └── sentiment/           # FinBERT sentiment scorer
 │   │
-│   ├── features/                # Feature engineering (TODO)
-│   ├── training/                # Training pipelines (TODO)
-│   ├── backtesting/             # Backtesting engine (TODO)
-│   └── config.py                # Configuration
+│   ├── strategies/              # Trading strategies
+│   │   └── smart_exit.py        # Smart exit strategy
+│   │
+│   └── trading/                 # Trading components
+│       └── risk_manager.py      # Risk management
+│
+├── models/                      # Trained model artifacts
+│   ├── sentiment/               # FinBERT model (99% acc)
+│   └── ensemble_trained/        # LSTM ensemble checkpoints
+│
+├── cloud/                       # GPU training scripts
+│   ├── train_ensemble_runpod.py # LSTM training on RTX 4090
+│   └── backtest_ensemble_runpod.py # GPU backtesting
 │
 ├── scripts/                     # Utility scripts
-├── notebooks/                   # Research notebooks
-├── docs/                        # Documentation
-├── tests/                       # Test suite
+│   ├── strategy_backtester.py   # Local backtesting
+│   └── train_price_model.py     # Price model training
 │
-├── ROADMAP.md                   # Detailed roadmap
-├── PROGRESS.md                  # Progress tracking
-├── docker-compose.yml           # Infrastructure
+├── reports/                     # Backtest results
+│   ├── ensemble_results_summary.csv  # 98 stock summary
+│   └── ensemble_all_trades.csv       # 392 trade details
+│
+├── docs/                        # Documentation
+├── data/                        # Raw & processed data
 └── requirements.txt             # Dependencies
 ```
 
@@ -146,39 +180,35 @@ InvestLLM/
 
 ## 🗺️ Roadmap
 
-### Phase 1: Data Foundation (Month 1-2) — ₹1.5L
-- [x] Project structure
-- [x] Database models
-- [x] Price data collector
-- [x] News collector
-- [x] Fundamental collector
-- [ ] Collect 20 years price data
-- [ ] Build 100K+ news corpus
-- [ ] Data quality validation
+### Phase 1: Data Foundation ✅ COMPLETE
+- [x] Project structure & database models
+- [x] Price data collector (98 NIFTY stocks, 20 years)
+- [x] Fundamental collector & news collector
+- [x] Feature engineering (30+ technical indicators)
 
-### Phase 2: Sentiment Model (Month 3-4) — ₹2L
-- [ ] Label 2000 news articles
-- [ ] Fine-tune Mistral 7B
-- [ ] Event detection model
-- [ ] Backtest sentiment signals
+### Phase 2: Sentiment Model ✅ COMPLETE
+- [x] FinBERT model fine-tuned on 76K financial samples
+- [x] 99% accuracy on financial sentiment
+- [x] Label mapping: negative/neutral/positive
+- [x] Integrated sentiment scorer
 
-### Phase 3: Price Prediction (Month 5-7) — ₹3L
-- [ ] Feature engineering (100+ features)
-- [ ] Temporal Fusion Transformer
-- [ ] Multi-timeframe prediction
-- [ ] Ensemble methods
+### Phase 3: Price Prediction ✅ COMPLETE
+- [x] LSTM with bidirectional attention (4M params)
+- [x] 400K training samples across 98 stocks
+- [x] GPU training on RunPod RTX 4090
+- [x] Ensemble architecture with meta-learner
 
-### Phase 4: Strategy Engine (Month 8-10) — ₹3L
-- [ ] RL environment for Indian markets
-- [ ] Train PPO/SAC agent
-- [ ] Position sizing model
-- [ ] Risk management
+### Phase 4: Strategy Engine ✅ COMPLETE
+- [x] Smart Exit strategy (50% profit, 15% stop loss)
+- [x] Risk manager with position sizing
+- [x] Full backtest: 73.31% return, 1.38 Sharpe
+- [x] 87% of stocks profitable (85/98)
 
-### Phase 5: Orchestrator LLM (Month 11-12) — ₹2.5L
-- [ ] Fine-tune orchestrator model
-- [ ] Self-improvement loop
-- [ ] Production deployment
-- [ ] Paper trading integration
+### Phase 5: Next Steps 🔄 IN PROGRESS
+- [ ] Real-time news sentiment integration
+- [ ] Live trading API (Zerodha/Angel)
+- [ ] Portfolio optimization
+- [ ] Orchestrator LLM for signal aggregation
 
 ---
 
@@ -225,15 +255,16 @@ InvestLLM/
 
 ---
 
-## 📈 Target Metrics
+## 📈 Achieved Metrics
 
-| Metric | Target | World-Class |
-|--------|--------|-------------|
-| Directional Accuracy | >52% | >55% |
-| Sharpe Ratio | >1.5 | >2.0 |
-| Max Drawdown | <15% | <10% |
-| Win Rate | >50% | >55% |
-| Sentiment Accuracy | >75% | >85% |
+| Metric | Target | Achieved | Status |
+|--------|--------|----------|--------|
+| Directional Accuracy | >52% | ~51% | ⚡ Close |
+| Sharpe Ratio | >1.5 | 1.38 | ⚡ Close |
+| Max Drawdown | <15% | ~12% | ✅ Met |
+| Win Rate | >50% | 62.8% | ✅ Exceeded |
+| Sentiment Accuracy | >75% | 99% | ✅ Exceeded |
+| Average Return | >30% | 73.31% | ✅ Exceeded |
 
 ---
 

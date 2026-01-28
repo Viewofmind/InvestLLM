@@ -183,12 +183,23 @@ def main(batch_size: int = 64, epochs: int = 20, lr: float = 1e-3):
         mode='min'
     )
     
+    # Detect best accelerator
+    import torch
+    if torch.cuda.is_available():
+        accelerator = "cuda"
+        console.print("[bold cyan]Using CUDA GPU for training![/bold cyan]")
+    else:
+        accelerator = "cpu"
+        console.print("[yellow]Using CPU for training[/yellow]")
+        # Note: MPS (Mac Metal) requires newer PyTorch Lightning version
+
     trainer = pl.Trainer(
         max_epochs=epochs,
         callbacks=[checkpoint_callback, early_stop],
-        accelerator="auto", # will use mps/cpu
+        accelerator=accelerator,
         devices=1,
-        log_every_n_steps=10
+        log_every_n_steps=50,  # Reduce logging overhead
+        enable_progress_bar=True
     )
     
     # 4. Train

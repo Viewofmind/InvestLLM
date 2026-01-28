@@ -1,0 +1,11 @@
+# InvestLLM Cloud Training Requirements
+# For RunPod / Cloud GPU
+
+torch>=2.0.0
+pytorch-lightning>=2.0.0
+pandas>=2.0.0
+numpy>=1.24.0
+scikit-learn>=1.3.0
+pyarrow>=14.0.0
+rich>=13.0.0
+ta>=0.10.0

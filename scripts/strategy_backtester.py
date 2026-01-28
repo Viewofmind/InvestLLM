@@ -7,6 +7,7 @@ Aggregates results across all tickers to estimate Portfolio Performance.
 """
 
 import os
+import sys
 from pathlib import Path
 import glob
 import numpy as np
@@ -14,6 +15,10 @@ import pandas as pd
 import torch
 from rich.console import Console
 from rich.table import Table
+
+# Add project root to path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from models.price_prediction.lstm_model import PricePredictionLSTM
 
 # Configuration
@@ -59,12 +64,16 @@ def backtest_ticker(ticker_file, model, seq_length=60):
         # We need to reconstruct the input sequences.
         # Ideally we should use same Dataset class, but let's do quick construction:
         
-        # features = [c for c in df.columns if c not in ['Date', 'Target', 'Open','High','Low','Close','Volume']]
         # FIX: Model was trained on ALL features including OHLCV.
         features = [c for c in df.columns if c not in ['Date', 'Target']]
-        # FIX: Model was trained on ALL features including OHLCV.
-        features = [c for c in df.columns if c not in ['Date', 'Target']]
-        feature_data = df[features].values
+
+        # FIX: Apply StandardScaler - fit on train data only, transform all
+        from sklearn.preprocessing import StandardScaler
+        scaler = StandardScaler()
+        train_data = df.iloc[:split_idx][features].values
+        scaler.fit(train_data)  # Fit only on training portion
+        feature_data = scaler.transform(df[features].values)  # Transform all data
+
         targets = df['Target'].values
         
         
