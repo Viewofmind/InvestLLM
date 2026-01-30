@@ -1,0 +1,3 @@
+Trade_ID,Symbol,Entry_Date,Entry_Price,Exit_Price,Entry_Signal,Exit_Reason,Net_PnL,Return_Pct
+1,RELIANCE,2023-01-03,2350.5,2366.25,BUY,Target Reached,158.75,0.67
+2,TCS,2023-01-03,3245.8,3225.35,SELL,Target Reached,-20.45,-0.63

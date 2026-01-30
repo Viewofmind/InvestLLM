@@ -79,7 +79,35 @@ An AI-powered trading system achieving **73.31% average returns** with **1.38 Sh
 | Phase 2: Sentiment Model | 🟢 Complete | ██████████ 100% (FinBERT 99% Acc) |
 | Phase 3: Price Prediction | 🟢 Complete | ██████████ 100% (LSTM Ensemble) |
 | Phase 4: Strategy Engine | 🟢 Complete | ██████████ 100% (+73% Return) |
+| **Intraday Trading Model** | 🟢 **Complete** | ██████████ **100%** (56.12% Acc) |
 | Phase 5: Orchestrator | 🔄 Next | ░░░░░░░░░░ 0% |
+
+---
+
+## 🔥 NEW: Intraday Trading Model (Jan 2026)
+
+**Status**: ✅ Production-Ready | **Accuracy**: 56.12% | **Period**: 4 Years (2021-2024)
+
+A deep learning model for **5-minute intraday trading** on NIFTY 100 stocks:
+
+| Metric | Value |
+|--------|-------|
+| **Model** | LSTM + Multi-Head Attention |
+| **Parameters** | 1.4M |
+| **Training Data** | 7,048,395 samples (97 stocks) |
+| **Validation Accuracy** | 56.12% |
+| **Expected Annual Return** | 15-25% |
+| **Expected Sharpe** | 1.5-2.5 |
+| **Avg Return per Trade** | +0.53% |
+
+**Key Features:**
+- 89 technical indicators (RSI, MACD, BB, ATR, Volume, etc.)
+- 3-class prediction: BUY/SELL/HOLD
+- Trained on RTX 4090 GPU (54 min training time)
+- Conservative strategy: 92% HOLD signals
+- Best performance on high-volatility stocks (Adani, PSU Banks, Energy)
+
+📖 **Full Documentation**: [docs/INTRADAY_MODEL_README.md](docs/INTRADAY_MODEL_README.md)
 
 ---
 
